@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -122,7 +124,10 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                     ) {
                         SignUpTextField(label = "Full Name", value = fullName, onValueChange = { fullName = it }, placeholder = "John Doe")
                         Spacer(modifier = Modifier.height(20.dp))
-                        SignUpTextField(label = "Email", value = email, onValueChange = { email = it }, placeholder = "example@email.com")
+                        SignUpTextField(label = "Email", value = email, onValueChange = { email = it.trim() }, placeholder = "example@gmail.com")
+                        if (email.isNotBlank() && !email.matches(Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"))) {
+                            Text("Please enter a valid email address", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
+                        }
                         Spacer(modifier = Modifier.height(20.dp))
                         
                         Text(text = "Phone Number", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color.Black)
@@ -167,10 +172,18 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                             Spacer(modifier = Modifier.width(8.dp))
                             OutlinedTextField(
                                 value = phoneNumber,
-                                onValueChange = { phoneNumber = it },
+                                onValueChange = { newValue ->
+                                    // Only allow digits, max 10
+                                    val digitsOnly = newValue.filter { it.isDigit() }
+                                    if (digitsOnly.length <= 10) {
+                                        phoneNumber = digitsOnly
+                                    }
+                                },
                                 modifier = Modifier.weight(0.60f),
-                                placeholder = { Text("00000 00000", color = Color.Gray) },
+                                placeholder = { Text("9876543210", color = Color.Gray) },
                                 shape = RoundedCornerShape(12.dp),
+                                singleLine = true,
+                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedTextColor = Color.Black,
                                     unfocusedTextColor = Color.Black,
@@ -178,6 +191,9 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                                     focusedBorderColor = PrimaryBlue
                                 )
                             )
+                        }
+                        if (phoneNumber.isNotBlank() && phoneNumber.length != 10) {
+                            Text("Phone number must be exactly 10 digits", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                         
@@ -187,7 +203,7 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                             value = password,
                             onValueChange = { password = it },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("••••••••", color = Color.Gray) },
+                            placeholder = { Text("Min 8 chars, A-z, 0-9, @#\$...", color = Color.Gray) },
                             trailingIcon = {
                                 val image = if (passwordVisible)
                                     Icons.Default.Visibility
@@ -206,7 +222,50 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                                 focusedBorderColor = PrimaryBlue
                             )
                         )
-                        
+
+                        // Password strength indicators
+                        if (password.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            val hasMinLength = password.length >= 8
+                            val hasUppercase = password.any { it.isUpperCase() }
+                            val hasLowercase = password.any { it.isLowerCase() }
+                            val hasDigit = password.any { it.isDigit() }
+                            val hasSpecial = password.any { !it.isLetterOrDigit() }
+                            val passedCount = listOf(hasMinLength, hasUppercase, hasLowercase, hasDigit, hasSpecial).count { it }
+
+                            // Strength bar
+                            val strengthColor = when {
+                                passedCount <= 2 -> Color(0xFFEF4444)
+                                passedCount <= 3 -> Color(0xFFF59E0B)
+                                passedCount <= 4 -> Color(0xFF3B82F6)
+                                else -> Color(0xFF10B981)
+                            }
+                            val strengthLabel = when {
+                                passedCount <= 2 -> "Weak"
+                                passedCount <= 3 -> "Fair"
+                                passedCount <= 4 -> "Good"
+                                else -> "Strong"
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                LinearProgressIndicator(
+                                    progress = { passedCount / 5f },
+                                    modifier = Modifier.weight(1f).height(4.dp),
+                                    color = strengthColor,
+                                    trackColor = Color.LightGray.copy(alpha = 0.3f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(strengthLabel, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = strengthColor)
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                PasswordRule("At least 8 characters", hasMinLength)
+                                PasswordRule("One uppercase letter (A-Z)", hasUppercase)
+                                PasswordRule("One lowercase letter (a-z)", hasLowercase)
+                                PasswordRule("One number (0-9)", hasDigit)
+                                PasswordRule("One special character (@#\$%...)", hasSpecial)
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(20.dp))
                         
                         Text(text = "Confirm Password", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color.Black)
@@ -253,12 +312,28 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                 Button(
                     onClick = {
                         // Client-side validation
-                        if (password != confirmPassword) {
-                            errorMessage = "Passwords do not match"
-                            return@Button
-                        }
                         if (fullName.isBlank() || email.isBlank() || password.isBlank()) {
                             errorMessage = "Please fill in all required fields"
+                            return@Button
+                        }
+                        if (!email.trim().matches(Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"))) {
+                            errorMessage = "Please enter a valid email address"
+                            return@Button
+                        }
+                        if (phoneNumber.isNotBlank() && phoneNumber.length != 10) {
+                            errorMessage = "Phone number must be exactly 10 digits"
+                            return@Button
+                        }
+                        if (password.length < 8) {
+                            errorMessage = "Password must be at least 8 characters"
+                            return@Button
+                        }
+                        if (!password.any { it.isUpperCase() } || !password.any { it.isLowerCase() } || !password.any { it.isDigit() } || !password.any { !it.isLetterOrDigit() }) {
+                            errorMessage = "Password must contain uppercase, lowercase, number, and special character"
+                            return@Button
+                        }
+                        if (password != confirmPassword) {
+                            errorMessage = "Passwords do not match"
                             return@Button
                         }
                         scope.launch {
@@ -333,6 +408,24 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
+    }
+}
+
+@Composable
+fun PasswordRule(text: String, passed: Boolean) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = if (passed) Icons.Default.CheckCircle else Icons.Default.Cancel,
+            contentDescription = null,
+            tint = if (passed) Color(0xFF10B981) else Color.LightGray,
+            modifier = Modifier.size(14.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = text,
+            fontSize = 11.sp,
+            color = if (passed) Color(0xFF10B981) else Color.Gray
+        )
     }
 }
 

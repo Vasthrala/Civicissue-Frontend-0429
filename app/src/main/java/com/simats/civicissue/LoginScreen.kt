@@ -143,7 +143,7 @@ fun LoginScreen(
                         value = email,
                         onValueChange = { email = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Enter your email or mobile", color = Color.LightGray) },
+                        placeholder = { Text("Enter your email address", color = Color.LightGray) },
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Color.Gray) },
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -153,6 +153,10 @@ fun LoginScreen(
                             focusedBorderColor = PrimaryBlue
                         )
                     )
+
+                    if (email.isNotBlank() && !email.trim().matches(Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"))) {
+                        Text("Please enter a valid email address", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
+                    }
 
                     Spacer(modifier = Modifier.height(20.dp))
 
