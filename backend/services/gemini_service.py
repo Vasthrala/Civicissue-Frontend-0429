@@ -9,14 +9,22 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
 IMAGE_ANALYSIS_PROMPT = (
-    "You are a civic issue analysis AI. Analyze this image of a civic/infrastructure issue.\n"
+    "You are an expert civic infrastructure issue analyst AI. "
+    "Carefully analyze this image and classify the civic/infrastructure problem shown.\n\n"
+    "SEVERITY GUIDELINES — be precise, do NOT default to MEDIUM:\n"
+    "- LOW: Minor cosmetic issues, small cracks, slightly overgrown areas, minor litter\n"
+    "- MEDIUM: Moderate damage needing scheduled repair, partial blockages, flickering lights\n"
+    "- HIGH: Significant damage causing safety hazards, large potholes, heavy flooding, broken barriers\n"
+    "- CRITICAL: Immediate danger to life, collapsed structures, exposed electrical wires, sewage overflow, major road collapse\n\n"
+    "Analyze the ACTUAL condition in the image. A deep pothole is HIGH not MEDIUM. "
+    "Overflowing garbage is HIGH not MEDIUM. A barely visible crack is LOW not MEDIUM.\n\n"
     "Return ONLY valid JSON (no markdown, no code blocks) with these fields:\n"
     '- "category": one of ["pothole", "garbage", "street_light", "water_leakage", '
     '"drainage", "road_damage", "broken_infrastructure", "other"]\n'
-    '- "severity": one of ["LOW", "MEDIUM", "HIGH", "CRITICAL"]\n'
-    '- "confidence": float between 0.0 and 1.0\n'
-    '- "tags": list of 3-5 descriptive keyword strings\n'
-    '- "description": one-line summary of what you see'
+    '- "severity": one of ["LOW", "MEDIUM", "HIGH", "CRITICAL"] — choose based on actual damage visible\n'
+    '- "confidence": float between 0.0 and 1.0 — how confident you are in the classification\n'
+    '- "tags": list of 3-5 descriptive keyword strings about what you observe\n'
+    '- "description": one-line summary describing the specific problem and its impact'
 )
 
 TEXT_ANALYSIS_PROMPT_TEMPLATE = (

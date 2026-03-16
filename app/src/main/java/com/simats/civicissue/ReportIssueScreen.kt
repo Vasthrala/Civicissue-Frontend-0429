@@ -162,7 +162,7 @@ fun ReportIssueScreen(
         scope.launch {
             try {
                 val api = RetrofitClient.instance
-                val imagePart = bitmap.toMultipartPart("image")
+                val imagePart = bitmap.toMultipartPart("file")
                 val result = api.analyzeImage(imagePart)
                 detectedCategory = result.detectedCategory
                 detectedSeverity = result.severityLevel
@@ -173,8 +173,11 @@ fun ReportIssueScreen(
                 }
                 showSeverityPopup = true
             } catch (e: Exception) {
-                Log.e("ReportIssue", "AI analysis failed: ${e.message}")
+                Log.e("ReportIssue", "AI analysis failed: ${e.message}", e)
+                submitError = "AI analysis failed: ${e.message ?: "Unknown error"}. Severity set to MEDIUM."
                 detectedSeverity = "MEDIUM"
+                detectedCategory = "other"
+                aiConfidence = 0f
                 showSeverityPopup = true
             } finally {
                 isDetectingAI = false
