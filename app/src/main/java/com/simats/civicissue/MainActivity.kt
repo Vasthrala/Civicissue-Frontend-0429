@@ -135,7 +135,10 @@ class MainActivity : ComponentActivity() {
                             onLogoutClick = {
                                 navController.navigate("logout")
                             },
-                            onAIChatClick = { navController.navigate("ai_chatbot") }
+                            onAIChatClick = { navController.navigate("ai_chatbot") },
+                            onComplaintClick = { complaintId ->
+                                navController.navigate("complaint_detail/$complaintId")
+                            }
                         )
                     }
                     composable("report_issue") {

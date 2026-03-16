@@ -8,7 +8,7 @@ interface CivicApiService {
     // Auth
     @POST("api/auth/signup") suspend fun signup(@Body body: SignupRequest): AuthResponse
     @POST("api/auth/login") suspend fun login(@Body body: LoginRequest): AuthResponse
-    @POST("api/auth/verify-email") suspend fun verifyEmail(@Body body: VerifyEmailRequest): Map<String, String>
+    @POST("api/auth/verify-email") suspend fun verifyEmail(@Body body: VerifyEmailRequest): Map<String, Any>
     @POST("api/auth/resend-otp") suspend fun resendOtp(@Body body: ForgotPasswordRequest): Map<String, String>
     @POST("api/auth/forgot-password") suspend fun forgotPassword(@Body body: ForgotPasswordRequest): Map<String, String>
     @POST("api/auth/verify-otp") suspend fun verifyOtp(@Body body: VerifyOtpRequest): Map<String, String>

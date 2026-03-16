@@ -39,7 +39,8 @@ fun CitizenDashboardScreen(
     onNotificationsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
-    onAIChatClick: () -> Unit = {}
+    onAIChatClick: () -> Unit = {},
+    onComplaintClick: (String) -> Unit = {}
 ) {
     var recentComplaints by remember { mutableStateOf<List<Complaint>>(emptyList()) }
     var activeIssuesCount by remember { mutableStateOf("--") }
@@ -347,7 +348,10 @@ fun CitizenDashboardScreen(
                         status = complaint.statusLabel,
                         icon = categoryIcon(complaint.category)
                     )
-                    CitizenReportItem(report)
+                    CitizenReportItem(
+                        report = report,
+                        modifier = Modifier.clickable { onComplaintClick(complaint.id) }
+                    )
                 }
             }
 
@@ -409,7 +413,7 @@ fun CitizenStatCard(
 }
 
 @Composable
-fun CitizenReportItem(report: CitizenReport) {
+fun CitizenReportItem(report: CitizenReport, modifier: Modifier = Modifier) {
     val borderColor = when (report.status) {
         "Resolved", "Completed" -> StatusSuccess
         "In Progress" -> StatusInfo
@@ -418,7 +422,7 @@ fun CitizenReportItem(report: CitizenReport) {
         else -> TextSecondary
     }
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
