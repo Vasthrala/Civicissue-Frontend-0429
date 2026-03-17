@@ -40,6 +40,7 @@ class ComplaintResponse(BaseModel):
     ai_confidence: Optional[float] = None
     ai_keywords: Optional[list] = None
     resolution_notes: Optional[str] = None
+    resolution_image: Optional[str] = None
     resolved_at: Optional[datetime] = None
     images: List[str] = []
     created_at: Optional[datetime] = None
@@ -57,6 +58,7 @@ class AssignOfficerRequest(BaseModel):
 
 class ResolveRequest(BaseModel):
     resolution_notes: str
+    resolution_image: Optional[str] = None
 
 
 class PaginatedResponse(BaseModel):

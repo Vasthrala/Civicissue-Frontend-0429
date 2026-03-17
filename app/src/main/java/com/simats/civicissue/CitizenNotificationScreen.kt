@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.simats.civicissue.ui.theme.CivicIssueTheme
 import com.simats.civicissue.ui.theme.PrimaryBlue
 import kotlinx.coroutines.launch
@@ -300,6 +301,27 @@ fun NotificationDetailContent(notification: CitizenNotificationInfo) {
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
+        } else if (!notification.imageUrl.isNullOrEmpty()) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                "Resolution Proof:",
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            val baseUrl = RetrofitClient.BASE_URL.trimEnd('/')
+            val fullUrl = if (notification.imageUrl.startsWith("http")) notification.imageUrl else "$baseUrl${notification.imageUrl}"
+            AsyncImage(
+                model = fullUrl,
+                contentDescription = "Resolution Proof",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -321,14 +343,15 @@ data class CitizenNotificationInfo(
     val time: String,
     val icon: ImageVector,
     val color: Color,
-    val image: Bitmap? = null
+    val image: Bitmap? = null,
+    val imageUrl: String? = null
 )
 
 fun CivicNotification.toNotificationInfo(): CitizenNotificationInfo {
     val iconAndColor = when (type.lowercase()) {
         "status_update" -> Icons.Default.Refresh to PrimaryBlue
         "complaint_created" -> Icons.Default.CheckCircle to Color(0xFF4CAF50)
-        "complaint_resolved", "resolved" -> Icons.Default.TaskAlt to Color(0xFF4CAF50)
+        "complaint_resolved", "resolved", "resolution" -> Icons.Default.TaskAlt to Color(0xFF4CAF50)
         "assignment" -> Icons.Default.PersonAdd to PrimaryBlue
         "comment" -> Icons.Default.Comment to Color(0xFFFFA000)
         "alert", "warning" -> Icons.Default.Warning to Color(0xFFD32F2F)
@@ -339,7 +362,8 @@ fun CivicNotification.toNotificationInfo(): CitizenNotificationInfo {
         message = message,
         time = createdAt?.let { formatDate(it) } ?: "",
         icon = iconAndColor.first,
-        color = iconAndColor.second
+        color = iconAndColor.second,
+        imageUrl = imageUrl
     )
 }
 

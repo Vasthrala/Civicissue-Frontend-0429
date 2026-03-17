@@ -11,6 +11,7 @@ class NotificationResponse(BaseModel):
     message: str
     type: str
     priority: str
+    image_url: Optional[str] = None
     is_read: bool
     created_at: Optional[datetime] = None
 

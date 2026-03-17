@@ -232,6 +232,7 @@ def resolve(
         complaint_id=complaint_id,
         notes=body.resolution_notes,
         resolved_by_id=current_user.id,
+        resolution_image=body.resolution_image,
     )
     if not complaint:
         raise HTTPException(status_code=404, detail="Complaint not found")

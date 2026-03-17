@@ -17,5 +17,6 @@ class Notification(Base):
         nullable=False,
     )
     priority = Column(Enum("LOW", "MEDIUM", "HIGH"), default="MEDIUM")
+    image_url = Column(String(500), nullable=True)
     is_read = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, server_default=func.now())

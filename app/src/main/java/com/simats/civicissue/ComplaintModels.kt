@@ -26,6 +26,7 @@ data class Complaint(
     @SerializedName("ai_confidence") val aiConfidence: Float? = null,
     @SerializedName("ai_keywords") val aiKeywords: List<String>? = null,
     @SerializedName("resolution_notes") val resolutionNotes: String? = null,
+    @SerializedName("resolution_image") val resolutionImage: String? = null,
     val images: List<String> = emptyList(),
     @SerializedName("created_at") val createdAt: String? = null,
     @SerializedName("updated_at") val updatedAt: String? = null
@@ -100,6 +101,7 @@ data class CivicNotification(
     val message: String = "",
     val type: String = "",
     val priority: String = "MEDIUM",
+    @SerializedName("image_url") val imageUrl: String? = null,
     @SerializedName("is_read") val isRead: Boolean = false,
     @SerializedName("created_at") val createdAt: String? = null
 )
@@ -244,7 +246,7 @@ data class IssueGroupItem(
 // Request models for admin actions
 data class StatusUpdateRequest(val status: String, val notes: String? = null)
 data class AssignOfficerRequest(val officer_id: String)
-data class ResolveRequest(val resolution_notes: String)
+data class ResolveRequest(val resolution_notes: String, val resolution_image: String? = null)
 data class CategoryCreate(val name: String, val description: String? = null, val icon: String? = null)
 data class DepartmentCreate(val name: String, val description: String? = null)
 data class OfficerCreateRequest(

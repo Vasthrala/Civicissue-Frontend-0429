@@ -8,6 +8,10 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.widget.Toast
+import java.io.ByteArrayOutputStream
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
@@ -348,9 +352,24 @@ fun AdminResolveIssueScreen(
                         isSubmitting = true
                         scope.launch {
                             try {
+                                // Upload resolution photo if captured
+                                var imageUrl: String? = null
+                                if (capturedBitmap != null) {
+                                    val stream = ByteArrayOutputStream()
+                                    capturedBitmap!!.compress(Bitmap.CompressFormat.JPEG, 85, stream)
+                                    val bytes = stream.toByteArray()
+                                    val requestBody = bytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                                    val part = MultipartBody.Part.createFormData("file", "resolution.jpg", requestBody)
+                                    val uploadResult = RetrofitClient.instance.uploadImage(part)
+                                    imageUrl = uploadResult["image_url"]
+                                }
+
                                 RetrofitClient.instance.resolveComplaint(
                                     complaintId,
-                                    ResolveRequest(resolution_notes = completionNote)
+                                    ResolveRequest(
+                                        resolution_notes = completionNote,
+                                        resolution_image = imageUrl
+                                    )
                                 )
                                 Toast.makeText(context, "Resolution submitted successfully!", Toast.LENGTH_LONG).show()
                                 onResolveSuccess()

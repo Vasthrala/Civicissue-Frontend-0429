@@ -29,6 +29,7 @@ class Complaint(Base):
     ai_confidence = Column(Float, nullable=True)
     ai_keywords = Column(JSON, nullable=True)
     resolution_notes = Column(Text, nullable=True)
+    resolution_image = Column(String(500), nullable=True)
     resolved_at = Column(TIMESTAMP, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())

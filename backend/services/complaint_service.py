@@ -79,6 +79,7 @@ def _complaint_to_response(db: Session, complaint: Complaint) -> dict:
         "ai_confidence": complaint.ai_confidence,
         "ai_keywords": complaint.ai_keywords,
         "resolution_notes": complaint.resolution_notes,
+        "resolution_image": complaint.resolution_image,
         "resolved_at": complaint.resolved_at,
         "images": image_urls,
         "created_at": complaint.created_at,
@@ -379,6 +380,7 @@ def resolve_complaint(
     complaint_id: str,
     notes: str,
     resolved_by_id: str,
+    resolution_image: str | None = None,
 ) -> Complaint:
     """Mark a complaint as resolved, adjust officer workload, and notify citizen."""
     complaint = db.query(Complaint).filter(Complaint.id == complaint_id).first()
@@ -388,6 +390,7 @@ def resolve_complaint(
     old_status = complaint.status
     complaint.status = "RESOLVED"
     complaint.resolution_notes = notes
+    complaint.resolution_image = resolution_image
     complaint.resolved_at = datetime.utcnow()
 
     # Decrement officer workload if an officer was assigned
@@ -420,6 +423,7 @@ def resolve_complaint(
         message=f"Your complaint '{complaint.title}' has been resolved. Notes: {notes}",
         type="RESOLUTION",
         priority="MEDIUM",
+        image_url=resolution_image,
     )
     db.add(notif)
 

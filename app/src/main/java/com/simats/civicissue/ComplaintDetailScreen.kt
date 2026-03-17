@@ -387,73 +387,138 @@ fun ComplaintDetailScreen(
                 }
             }
 
-            // Action Buttons
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    if (comp.status == "ASSIGNED") {
-                        OutlinedButton(
-                            onClick = {
-                                scope.launch {
-                                    isUpdatingStatus = true
-                                    statusUpdateMessage = null
-                                    try {
-                                        RetrofitClient.instance.updateComplaintStatus(
-                                            comp.id,
-                                            StatusUpdateRequest(status = "IN_PROGRESS", notes = "Work started by admin")
-                                        )
-                                        complaint = RetrofitClient.instance.getComplaint(complaintId)
-                                        statusHistory = RetrofitClient.instance.getComplaintHistory(complaintId)
-                                        statusUpdateMessage = "Status updated to In Progress"
-                                    } catch (e: Exception) {
-                                        Log.e("ComplaintDetail", "Failed to update status: ${e.message}")
-                                        statusUpdateMessage = "Error: ${e.message ?: "Failed to update status"}"
-                                    } finally {
-                                        isUpdatingStatus = false
-                                    }
-                                }
-                            },
-                            enabled = !isUpdatingStatus,
-                            modifier = Modifier.weight(1f).height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, if (isUpdatingStatus) Color.Gray else PrimaryBlue),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = if (isUpdatingStatus) Color.Gray else PrimaryBlue)
-                        ) {
-                            if (isUpdatingStatus) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = PrimaryBlue,
-                                    strokeWidth = 2.dp
+            // Resolution Info (when complaint is resolved)
+            if (comp.status == "RESOLVED") {
+                item {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = Color(0xFF4CAF50),
+                                    modifier = Modifier.size(22.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Updating...", fontWeight = FontWeight.Bold)
-                            } else {
-                                Text("Start Work", fontWeight = FontWeight.Bold)
+                                Text(
+                                    "Resolution Details",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 17.sp,
+                                    color = Color(0xFF2E7D32)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = comp.resolutionNotes ?: "Issue has been resolved.",
+                                fontSize = 14.sp,
+                                lineHeight = 20.sp,
+                                color = Color.DarkGray
+                            )
+                            if (!comp.resolutionImage.isNullOrEmpty()) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    "Completion Proof",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = Color(0xFF2E7D32)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                val baseUrl = RetrofitClient.BASE_URL.trimEnd('/')
+                                val fullUrl = if (comp.resolutionImage.startsWith("http")) comp.resolutionImage else "$baseUrl${comp.resolutionImage}"
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color.LightGray)
+                                        .clickable { fullScreenImageUrl = fullUrl }
+                                ) {
+                                    AsyncImage(
+                                        model = fullUrl,
+                                        contentDescription = "Resolution proof photo",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
                             }
                         }
                     }
-                    Button(
-                        onClick = { onResolveClick(comp.id) },
-                        modifier = Modifier.weight(1f).height(50.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                }
+            }
+
+            // Admin Action Buttons (only visible to admins, hidden for resolved complaints)
+            if (TokenManager.getUserRole() == "admin" && comp.status != "RESOLVED" && comp.status != "COMPLETED") {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(
-                                    Brush.horizontalGradient(
-                                        colors = listOf(PrimaryBlue, PrimaryDark)
-                                    ),
-                                    RoundedCornerShape(12.dp)
-                                ),
-                            contentAlignment = Alignment.Center
+                        if (comp.status == "ASSIGNED") {
+                            OutlinedButton(
+                                onClick = {
+                                    scope.launch {
+                                        isUpdatingStatus = true
+                                        statusUpdateMessage = null
+                                        try {
+                                            RetrofitClient.instance.updateComplaintStatus(
+                                                comp.id,
+                                                StatusUpdateRequest(status = "IN_PROGRESS", notes = "Work started by admin")
+                                            )
+                                            complaint = RetrofitClient.instance.getComplaint(complaintId)
+                                            statusHistory = RetrofitClient.instance.getComplaintHistory(complaintId)
+                                            statusUpdateMessage = "Status updated to In Progress"
+                                        } catch (e: Exception) {
+                                            Log.e("ComplaintDetail", "Failed to update status: ${e.message}")
+                                            statusUpdateMessage = "Error: ${e.message ?: "Failed to update status"}"
+                                        } finally {
+                                            isUpdatingStatus = false
+                                        }
+                                    }
+                                },
+                                enabled = !isUpdatingStatus,
+                                modifier = Modifier.weight(1f).height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, if (isUpdatingStatus) Color.Gray else PrimaryBlue),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = if (isUpdatingStatus) Color.Gray else PrimaryBlue)
+                            ) {
+                                if (isUpdatingStatus) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = PrimaryBlue,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Updating...", fontWeight = FontWeight.Bold)
+                                } else {
+                                    Text("Start Work", fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                        Button(
+                            onClick = { onResolveClick(comp.id) },
+                            modifier = Modifier.weight(1f).height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
                         ) {
-                            Text("Complete & Photo", fontWeight = FontWeight.Bold, color = Color.White)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            colors = listOf(PrimaryBlue, PrimaryDark)
+                                        ),
+                                        RoundedCornerShape(12.dp)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("Complete & Photo", fontWeight = FontWeight.Bold, color = Color.White)
+                            }
                         }
                     }
                 }
