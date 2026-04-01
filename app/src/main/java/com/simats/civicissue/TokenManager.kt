@@ -8,11 +8,44 @@ object TokenManager {
     var pendingEmail: String? = null
     var pendingOtp: String? = null
 
-    fun saveToken(t: String) { token = t }
+    @Synchronized
+    fun saveToken(t: String?) { 
+        token = t 
+    }
+
+    @Synchronized
     fun getToken(): String? = token
-    fun saveUser(u: UserProfile) { currentUser = u }
+
+    @Synchronized
+    fun saveUser(u: UserProfile?) { 
+        currentUser = u 
+    }
+
+    @Synchronized
     fun getUser(): UserProfile? = currentUser
-    fun clear() { token = null; currentUser = null; pendingEmail = null; pendingOtp = null }
-    fun isLoggedIn(): Boolean = token != null
-    fun getUserRole(): String = currentUser?.role ?: "citizen"
+
+    @Synchronized
+    fun clear() { 
+        token = null
+        currentUser = null
+        pendingEmail = null
+        pendingOtp = null
+    }
+
+    @Synchronized
+    fun isLoggedIn(): Boolean = !token.isNullOrBlank()
+
+    @Synchronized
+    fun getUserRole(): String {
+        return try {
+            currentUser?.role ?: "citizen"
+        } catch (e: Exception) {
+            "citizen"
+        }
+    }
+    
+    @Synchronized
+    fun isSessionValid(): Boolean {
+        return isLoggedIn() && currentUser != null
+    }
 }

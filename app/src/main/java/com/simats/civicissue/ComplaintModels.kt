@@ -2,6 +2,8 @@ package com.simats.civicissue
 
 import androidx.compose.ui.graphics.Color
 import com.google.gson.annotations.SerializedName
+import java.util.*
+import java.text.SimpleDateFormat
 
 // ===== Complaint Models =====
 data class Complaint(
@@ -319,5 +321,36 @@ data class CitizenReportDto(
     val icon: String = ""
 )
 
-// ===== Remove allComplaints mock data =====
-// Mock data has been removed - all data comes from backend API
+fun formatCivicNotificationDate(iso: String): String {
+    if (iso.isBlank()) return ""
+    return try {
+        val cleanIso = iso.replace("Z", "").let { 
+            if (it.contains(".")) it.substringBefore(".") else it 
+        }
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        parser.timeZone = TimeZone.getTimeZone("UTC")
+        val date = parser.parse(cleanIso) ?: return iso
+        
+        val now = Calendar.getInstance()
+        val then = Calendar.getInstance()
+        then.time = date
+        
+        val diffMs = now.timeInMillis - then.timeInMillis
+        val diffMins = diffMs / 60000
+        val diffHours = diffMins / 60
+        val diffDays = diffHours / 24
+        
+        when {
+            diffMins < 1 -> "Just now"
+            diffMins < 60 -> "${diffMins}m ago"
+            diffHours < 24 -> "${diffHours}h ago"
+            diffDays < 7 -> "${diffDays}d ago"
+            else -> {
+                val formatter = SimpleDateFormat("MMM dd", Locale.getDefault())
+                formatter.format(date)
+            }
+        }
+    } catch (_: Exception) { 
+        iso.split("T").firstOrNull() ?: iso
+    }
+}

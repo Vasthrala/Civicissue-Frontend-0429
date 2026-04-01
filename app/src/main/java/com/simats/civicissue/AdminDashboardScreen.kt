@@ -65,7 +65,9 @@ fun AdminDashboardScreen(
             stats = statsDeferred.await()
             recentComplaints = complaintsDeferred.await().items
             unreadCount = unreadDeferred.await().count
-        } catch (_: Exception) { }
+        } catch (e: Exception) { 
+            safeLog("AdminDashboard", "Failed to load dashboard data", e)
+        }
         finally { isLoading = false }
     }
 
@@ -163,56 +165,7 @@ fun AdminDashboardScreen(
                     )
                 }
             },
-            bottomBar = {
-                NavigationBar(
-                    containerColor = Color.White,
-                    tonalElevation = 8.dp
-                ) {
-                    NavigationBarItem(
-                        selected = true,
-                        onClick = { /* Already on Dashboard */ },
-                        icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard") },
-                        label = { Text("Dashboard", fontSize = 12.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = PrimaryBlue,
-                            selectedTextColor = PrimaryBlue,
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray,
-                            indicatorColor = PrimaryBlue.copy(alpha = 0.1f)
-                        )
-                    )
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = onReportsClick,
-                        icon = { Icon(Icons.AutoMirrored.Filled.Assignment, contentDescription = "Complaints") },
-                        label = { Text("Complaints", fontSize = 12.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
-                        )
-                    )
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = onAnalyticsClick,
-                        icon = { Icon(Icons.Default.BarChart, contentDescription = "Analytics") },
-                        label = { Text("Analytics", fontSize = 12.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
-                        )
-                    )
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = onSettingsClick,
-                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                        label = { Text("Settings", fontSize = 12.sp) },
-                        colors = NavigationBarItemDefaults.colors(
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray
-                        )
-                    )
-                }
-            },
+
             containerColor = BackgroundLight
         ) { paddingValues ->
             LazyColumn(
@@ -229,7 +182,7 @@ fun AdminDashboardScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onProfessionalDashboardClick() },
+                            .debouncedClickable { onProfessionalDashboardClick() },
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = PrimaryBlue),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -332,7 +285,7 @@ fun AdminDashboardScreen(
                             fontSize = 12.sp,
                             color = PrimaryBlue,
                             fontWeight = FontWeight.Medium,
-                            modifier = Modifier.clickable { onReportsClick() }
+                            modifier = Modifier.debouncedClickable { onReportsClick() }
                         )
                     }
                 }
@@ -489,7 +442,7 @@ fun DrawerItem(
             ) 
         },
         selected = isSelected,
-        onClick = onClick,
+        onClick = { onClick() },
         icon = { 
             Icon(
                 imageVector = icon, 
@@ -498,7 +451,9 @@ fun DrawerItem(
             ) 
         },
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+        modifier = Modifier
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .debouncedClickable { onClick() },
         colors = NavigationDrawerItemDefaults.colors(
             selectedContainerColor = Color(0xFFE3F2FD),
             selectedIconColor = Color(0xFF2962FF),
@@ -521,7 +476,7 @@ fun StatCard(
     Card(
         modifier = modifier
             .height(110.dp)
-            .clickable { onClick() },
+            .debouncedClickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -574,7 +529,7 @@ fun OriginalTaskItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .debouncedClickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)

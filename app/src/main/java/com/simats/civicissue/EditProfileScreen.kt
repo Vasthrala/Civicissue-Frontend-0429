@@ -63,7 +63,13 @@ fun EditProfileScreen(
             )
             OutlinedTextField(
                 value = name,
-                onValueChange = { name = it },
+                onValueChange = { 
+                    // Only allow alphabets and spaces
+                    if (it.all { char -> char.isLetter() || char.isWhitespace() }) {
+                        name = it
+                        errorMessage = null
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Enter your full name") },
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp)) },
@@ -90,7 +96,10 @@ fun EditProfileScreen(
             )
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { 
+                    email = it 
+                    errorMessage = null 
+                },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Enter your email") },
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp)) },
@@ -117,7 +126,14 @@ fun EditProfileScreen(
             )
             OutlinedTextField(
                 value = phone,
-                onValueChange = { phone = it },
+                onValueChange = { 
+                    // Allow only digits and enforce max 10
+                    val digitsOnly = it.filter { char -> char.isDigit() }
+                    if (digitsOnly.length <= 10) {
+                        phone = digitsOnly
+                    }
+                    errorMessage = null
+                },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Enter your phone number") },
                 leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp)) },
@@ -143,6 +159,29 @@ fun EditProfileScreen(
             Button(
                 onClick = {
                     if (isSaving) return@Button
+                    
+                    // Frontend Validations
+                    if (name.isBlank()) {
+                        errorMessage = "Name cannot be empty"
+                        return@Button
+                    }
+                    
+                    if (!name.all { char -> char.isLetter() || char.isWhitespace() }) {
+                        errorMessage = "Name must only contain alphabets and spaces"
+                        return@Button
+                    }
+                    
+                    val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
+                    if (email.isNotBlank() && !email.matches(emailRegex)) {
+                        errorMessage = "Please enter a valid email address"
+                        return@Button
+                    }
+                    
+                    if (phone.isNotBlank() && phone.length != 10) {
+                        errorMessage = "Phone number must be exactly 10 digits"
+                        return@Button
+                    }
+
                     isSaving = true
                     errorMessage = null
                     scope.launch {

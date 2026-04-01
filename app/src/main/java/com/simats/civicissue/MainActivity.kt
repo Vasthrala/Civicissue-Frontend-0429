@@ -28,14 +28,14 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = "splash") {
                     composable("splash") {
                         SplashScreen(onNavigate = {
-                            navController.navigate("role_selection") {
+                            SafeNavigator.navigate(navController, "role_selection") {
                                 popUpTo("splash") { inclusive = true }
                             }
                         })
                     }
                     composable("role_selection") {
                         RoleSelectionScreen(onRoleSelected = { role ->
-                            navController.navigate("login/$role")
+                            SafeNavigator.navigate(navController, "login/$role")
                         })
                     }
                     composable("login/{role}") { backStackEntry ->
@@ -43,17 +43,17 @@ class MainActivity : ComponentActivity() {
                         LoginScreen(
                             role = role,
                             onBack = { navController.popBackStack() },
-                            onSignUp = { navController.navigate("signup") },
-                            onForgotPassword = { navController.navigate("reset_password/$role") },
+                            onSignUp = { SafeNavigator.navigate(navController, "signup") },
+                            onForgotPassword = { SafeNavigator.navigate(navController, "reset_password/$role") },
                             onLoginSuccess = { userRole ->
                                 when (userRole) {
-                                    "admin" -> navController.navigate("admin_dashboard") {
+                                    "admin" -> SafeNavigator.navigate(navController, "admin_dashboard") {
                                         popUpTo(0) { inclusive = true }
                                     }
-                                    "officer" -> navController.navigate("officer_dashboard") {
+                                    "officer" -> SafeNavigator.navigate(navController, "officer_dashboard") {
                                         popUpTo(0) { inclusive = true }
                                     }
-                                    else -> navController.navigate("citizen_dashboard") {
+                                    else -> SafeNavigator.navigate(navController, "citizen_dashboard") {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 }
@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
                     composable("signup") {
                         SignUpScreen(
                             onBack = { navController.popBackStack() },
-                            onVerifyAccount = { navController.navigate("verify_account") },
+                            onVerifyAccount = { SafeNavigator.navigate(navController, "verify_account") },
                             onLogin = { navController.popBackStack() }
                         )
                     }
@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                         VerifyAccountScreen(
                             onBack = { navController.popBackStack() },
                             onVerify = { 
-                                navController.navigate("account_created") {
+                                SafeNavigator.navigate(navController, "account_created") {
                                     popUpTo("signup") { inclusive = true }
                                 }
                             }
@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                     composable("account_created") {
                         AccountCreatedScreen(
                             onProceedToLogin = {
-                                navController.navigate("role_selection") {
+                                SafeNavigator.navigate(navController, "role_selection") {
                                     popUpTo(0) { inclusive = true }
                                 }
                             }
@@ -88,22 +88,22 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("admin_dashboard") {
                         AdminDashboardScreen(
-                            onNotifications = { navController.navigate("notifications") },
-                            onAssignedClick = { navController.navigate("assigned_issues") },
-                            onInProgressClick = { navController.navigate("in_progress_issues") },
-                            onCompletedClick = { navController.navigate("completed_issues") },
-                            onSettingsClick = { navController.navigate("settings") },
-                            onLogoutClick = { navController.navigate("logout") },
-                            onStatusClick = { navController.navigate("status_tracking") },
-                            onReportsClick = { navController.navigate("all_reports") },
-                            onProfileClick = { navController.navigate("admin_profile") },
-                            onHistoryClick = { navController.navigate("issue_history") },
-                            onProfessionalDashboardClick = { navController.navigate("modern_admin_dashboard") },
+                            onNotifications = { SafeNavigator.navigate(navController, "notifications") },
+                            onAssignedClick = { SafeNavigator.navigate(navController, "assigned_issues") },
+                            onInProgressClick = { SafeNavigator.navigate(navController, "in_progress_issues") },
+                            onCompletedClick = { SafeNavigator.navigate(navController, "completed_issues") },
+                            onSettingsClick = { SafeNavigator.navigate(navController, "settings") },
+                            onLogoutClick = { SafeNavigator.navigate(navController, "logout") },
+                            onStatusClick = { SafeNavigator.navigate(navController, "status_tracking") },
+                            onReportsClick = { SafeNavigator.navigate(navController, "all_reports") },
+                            onProfileClick = { SafeNavigator.navigate(navController, "admin_profile") },
+                            onHistoryClick = { SafeNavigator.navigate(navController, "issue_history") },
+                            onProfessionalDashboardClick = { SafeNavigator.navigate(navController, "modern_admin_dashboard") },
                             onTaskClick = { complaintId ->
-                                navController.navigate("complaint_detail/$complaintId")
+                                SafeNavigator.navigate(navController, "complaint_detail/$complaintId")
                             },
-                            onAIChatClick = { navController.navigate("admin_ai_chatbot") },
-                            onAnalyticsClick = { navController.navigate("analytics") }
+                            onAIChatClick = { SafeNavigator.navigate(navController, "admin_ai_chatbot") },
+                            onAnalyticsClick = { SafeNavigator.navigate(navController, "analytics") }
                         )
                     }
                     composable("admin_ai_chatbot") {
@@ -119,43 +119,43 @@ class MainActivity : ComponentActivity() {
                     composable("modern_admin_dashboard") {
                         ModernAdminDashboardScreen(
                             onComplaintClick = { complaintId ->
-                                navController.navigate("complaint_detail/$complaintId")
+                                SafeNavigator.navigate(navController, "complaint_detail/$complaintId")
                             },
                             onBack = { navController.popBackStack() },
-                            onReportsClick = { navController.navigate("all_reports") },
-                            onProfileClick = { navController.navigate("admin_profile") }
+                            onReportsClick = { SafeNavigator.navigate(navController, "all_reports") },
+                            onProfileClick = { SafeNavigator.navigate(navController, "admin_profile") }
                         )
                     }
                     composable("citizen_dashboard") {
                         CitizenDashboardScreen(
-                            onReportIssue = { navController.navigate("report_issue") },
-                            onViewMyIssues = { navController.navigate("citizen_issues") },
-                            onActiveIssuesClick = { navController.navigate("active_issues") },
-                            onResolvedIssuesClick = { navController.navigate("resolved_issues") },
-                            onNotificationsClick = { navController.navigate("citizen_notifications") },
-                            onProfileClick = { navController.navigate("citizen_profile") },
+                            onReportIssue = { SafeNavigator.navigate(navController, "report_issue") },
+                            onViewMyIssues = { SafeNavigator.navigate(navController, "citizen_issues") },
+                            onActiveIssuesClick = { SafeNavigator.navigate(navController, "active_issues") },
+                            onResolvedIssuesClick = { SafeNavigator.navigate(navController, "resolved_issues") },
+                            onNotificationsClick = { SafeNavigator.navigate(navController, "citizen_notifications") },
+                            onProfileClick = { SafeNavigator.navigate(navController, "citizen_profile") },
                             onLogoutClick = {
-                                navController.navigate("logout")
+                                SafeNavigator.navigate(navController, "logout")
                             },
-                            onAIChatClick = { navController.navigate("ai_chatbot") },
+                            onAIChatClick = { SafeNavigator.navigate(navController, "ai_chatbot") },
                             onComplaintClick = { complaintId ->
-                                navController.navigate("complaint_detail/$complaintId")
+                                SafeNavigator.navigate(navController, "complaint_detail/$complaintId")
                             }
                         )
                     }
                     composable("report_issue") {
                         ReportIssueScreen(
                             onBack = {
-                                navController.navigate("citizen_dashboard") {
+                                SafeNavigator.navigate(navController, "citizen_dashboard") {
                                     popUpTo("citizen_dashboard") { inclusive = true }
                                 }
                             },
                             onViewComplaints = {
-                                navController.navigate("citizen_issues") {
+                                SafeNavigator.navigate(navController, "citizen_issues") {
                                     popUpTo("citizen_dashboard") { inclusive = false }
                                 }
                             },
-                            onProfileClick = { navController.navigate("citizen_profile") }
+                            onProfileClick = { SafeNavigator.navigate(navController, "citizen_profile") }
                         )
                     }
                     composable("citizen_notifications") {
@@ -172,43 +172,43 @@ class MainActivity : ComponentActivity() {
                         CitizenIssuesScreen(
                             onBack = { navController.popBackStack() },
                             onHomeClick = {
-                                navController.navigate("citizen_dashboard") {
+                                SafeNavigator.navigate(navController, "citizen_dashboard") {
                                     popUpTo("citizen_dashboard") { inclusive = true }
                                 }
                             },
-                            onReportClick = { navController.navigate("report_issue") },
-                            onProfileClick = { navController.navigate("citizen_profile") }
+                            onReportClick = { SafeNavigator.navigate(navController, "report_issue") },
+                            onProfileClick = { SafeNavigator.navigate(navController, "citizen_profile") }
                         )
                     }
                     composable("active_issues") {
                         ActiveIssuesScreen(
                             onBack = { navController.popBackStack() },
-                            onHomeClick = { navController.navigate("citizen_dashboard") },
-                            onReportClick = { navController.navigate("report_issue") },
-                            onIssuesClick = { navController.navigate("citizen_issues") },
-                            onProfileClick = { navController.navigate("citizen_profile") }
+                            onHomeClick = { SafeNavigator.navigate(navController, "citizen_dashboard") },
+                            onReportClick = { SafeNavigator.navigate(navController, "report_issue") },
+                            onIssuesClick = { SafeNavigator.navigate(navController, "citizen_issues") },
+                            onProfileClick = { SafeNavigator.navigate(navController, "citizen_profile") }
                         )
                     }
                     composable("resolved_issues") {
                         ResolvedIssuesScreen(
                             onBack = { navController.popBackStack() },
-                            onHomeClick = { navController.navigate("citizen_dashboard") },
-                            onReportClick = { navController.navigate("report_issue") },
-                            onIssuesClick = { navController.navigate("citizen_issues") },
-                            onProfileClick = { navController.navigate("citizen_profile") }
+                            onHomeClick = { SafeNavigator.navigate(navController, "citizen_dashboard") },
+                            onReportClick = { SafeNavigator.navigate(navController, "report_issue") },
+                            onIssuesClick = { SafeNavigator.navigate(navController, "citizen_issues") },
+                            onProfileClick = { SafeNavigator.navigate(navController, "citizen_profile") }
                         )
                     }
                     composable("citizen_profile") {
                         CitizenProfileScreen(
                             onBack = { navController.popBackStack() },
-                            onHomeClick = { navController.navigate("citizen_dashboard") },
-                            onReportClick = { navController.navigate("report_issue") },
-                            onIssuesClick = { navController.navigate("citizen_issues") },
-                            onEditProfile = { navController.navigate("edit_profile") },
-                            onChangePassword = { navController.navigate("citizen_change_password") },
+                            onHomeClick = { SafeNavigator.navigate(navController, "citizen_dashboard") },
+                            onReportClick = { SafeNavigator.navigate(navController, "report_issue") },
+                            onIssuesClick = { SafeNavigator.navigate(navController, "citizen_issues") },
+                            onEditProfile = { SafeNavigator.navigate(navController, "edit_profile") },
+                            onChangePassword = { SafeNavigator.navigate(navController, "citizen_change_password") },
                             onLogoutClick = {
                                 TokenManager.clear()
-                                navController.navigate("role_selection") {
+                                SafeNavigator.navigate(navController, "role_selection") {
                                     popUpTo(0) { inclusive = true }
                                 }
                             }
@@ -224,7 +224,7 @@ class MainActivity : ComponentActivity() {
                         ChangePasswordScreen(
                             onBack = { navController.popBackStack() },
                             onUpdatePassword = {
-                                navController.navigate("password_updated/Citizen") {
+                                SafeNavigator.navigate(navController, "password_updated/Citizen") {
                                     popUpTo("citizen_profile") { inclusive = true }
                                 }
                             }
@@ -237,14 +237,14 @@ class MainActivity : ComponentActivity() {
                             complaintId = complaintId,
                             onBack = { navController.popBackStack() },
                             onAssignOfficer = { 
-                                navController.navigate("assign_officer/$complaintId") 
+                                SafeNavigator.navigate(navController, "assign_officer/$complaintId") 
                             },
                             onUpdateStatus = { status -> /* update status */ },
                             onResolveClick = { id ->
-                                navController.navigate("admin_resolve_issue/$id")
+                                SafeNavigator.navigate(navController, "admin_resolve_issue/$id")
                             },
                             onReviewClick = { id ->
-                                navController.navigate("admin_review/$id")
+                                SafeNavigator.navigate(navController, "admin_review/$id")
                             }
                         )
                     }
@@ -267,7 +267,7 @@ class MainActivity : ComponentActivity() {
                             complaintId = complaintId,
                             onBack = { navController.popBackStack() },
                             onResolveSuccess = {
-                                navController.navigate("admin_dashboard") {
+                                SafeNavigator.navigate(navController, "admin_dashboard") {
                                     popUpTo("admin_dashboard") { inclusive = true }
                                 }
                             }
@@ -277,12 +277,12 @@ class MainActivity : ComponentActivity() {
                     // ===== OFFICER ROUTES =====
                     composable("officer_dashboard") {
                         OfficerDashboardScreen(
-                            onNotificationsClick = { navController.navigate("officer_notifications") },
-                            onProfileClick = { navController.navigate("officer_profile") },
+                            onNotificationsClick = { SafeNavigator.navigate(navController, "officer_notifications") },
+                            onProfileClick = { SafeNavigator.navigate(navController, "officer_profile") },
                             onComplaintClick = { complaintId ->
-                                navController.navigate("officer_complaint_detail/$complaintId")
+                                SafeNavigator.navigate(navController, "officer_complaint_detail/$complaintId")
                             },
-                            onLogoutClick = { navController.navigate("logout") }
+                            onLogoutClick = { SafeNavigator.navigate(navController, "logout") }
                         )
                     }
 
@@ -291,8 +291,8 @@ class MainActivity : ComponentActivity() {
                         OfficerComplaintDetailScreen(
                             complaintId = complaintId,
                             onBack = { navController.popBackStack() },
-                            onPostUpdate = { navController.navigate("officer_post_update/$complaintId") },
-                            onComplete = { navController.navigate("officer_complete/$complaintId") }
+                            onPostUpdate = { SafeNavigator.navigate(navController, "officer_post_update/$complaintId") },
+                            onComplete = { SafeNavigator.navigate(navController, "officer_complete/$complaintId") }
                         )
                     }
 
@@ -311,7 +311,7 @@ class MainActivity : ComponentActivity() {
                             complaintId = complaintId,
                             onBack = { navController.popBackStack() },
                             onSuccess = {
-                                navController.navigate("officer_dashboard") {
+                                SafeNavigator.navigate(navController, "officer_dashboard") {
                                     popUpTo("officer_dashboard") { inclusive = true }
                                 }
                             }
@@ -327,11 +327,11 @@ class MainActivity : ComponentActivity() {
                     composable("officer_profile") {
                         OfficerProfileScreen(
                             onBack = { navController.popBackStack() },
-                            onEditProfile = { navController.navigate("edit_profile") },
-                            onChangePassword = { navController.navigate("officer_change_password") },
+                            onEditProfile = { SafeNavigator.navigate(navController, "edit_profile") },
+                            onChangePassword = { SafeNavigator.navigate(navController, "officer_change_password") },
                             onLogoutClick = {
                                 TokenManager.clear()
-                                navController.navigate("role_selection") {
+                                SafeNavigator.navigate(navController, "role_selection") {
                                     popUpTo(0) { inclusive = true }
                                 }
                             }
@@ -342,7 +342,7 @@ class MainActivity : ComponentActivity() {
                         ChangePasswordScreen(
                             onBack = { navController.popBackStack() },
                             onUpdatePassword = {
-                                navController.navigate("password_updated/Officer") {
+                                SafeNavigator.navigate(navController, "password_updated/Officer") {
                                     popUpTo("officer_profile") { inclusive = true }
                                 }
                             }
@@ -356,7 +356,7 @@ class MainActivity : ComponentActivity() {
                             complaintId = complaintId,
                             onBack = { navController.popBackStack() },
                             onReviewComplete = {
-                                navController.navigate("admin_dashboard") {
+                                SafeNavigator.navigate(navController, "admin_dashboard") {
                                     popUpTo("admin_dashboard") { inclusive = true }
                                 }
                             }
@@ -368,9 +368,9 @@ class MainActivity : ComponentActivity() {
                         ManageOfficersScreen(
                             onBack = { navController.popBackStack() },
                             onOfficerClick = { officerId ->
-                                navController.navigate("admin_officer_detail/$officerId")
+                                SafeNavigator.navigate(navController, "admin_officer_detail/$officerId")
                             },
-                            onCreateOfficer = { navController.navigate("create_officer") }
+                            onCreateOfficer = { SafeNavigator.navigate(navController, "create_officer") }
                         )
                     }
 
@@ -380,7 +380,7 @@ class MainActivity : ComponentActivity() {
                             officerId = officerId,
                             onBack = { navController.popBackStack() },
                             onComplaintClick = { complaintId ->
-                                navController.navigate("complaint_detail/$complaintId")
+                                SafeNavigator.navigate(navController, "complaint_detail/$complaintId")
                             }
                         )
                     }
@@ -415,11 +415,11 @@ class MainActivity : ComponentActivity() {
                     composable("settings") {
                         SettingsScreen(
                             onBack = { navController.popBackStack() },
-                            onLogout = { navController.navigate("logout") },
-                            onManageCategories = { navController.navigate("manage_categories") },
-                            onManageDepartments = { navController.navigate("manage_departments") },
-                            onManageOfficers = { navController.navigate("manage_officers") },
-                            onSystemLogs = { navController.navigate("system_logs") }
+                            onLogout = { SafeNavigator.navigate(navController, "logout") },
+                            onManageCategories = { SafeNavigator.navigate(navController, "manage_categories") },
+                            onManageDepartments = { SafeNavigator.navigate(navController, "manage_departments") },
+                            onManageOfficers = { SafeNavigator.navigate(navController, "manage_officers") },
+                            onSystemLogs = { SafeNavigator.navigate(navController, "system_logs") }
                         )
                     }
                     composable("manage_categories") {
@@ -441,7 +441,7 @@ class MainActivity : ComponentActivity() {
                         AllReportsScreen(
                             onBack = { navController.popBackStack() },
                             onComplaintClick = { complaintId ->
-                                navController.navigate("complaint_detail/$complaintId")
+                                SafeNavigator.navigate(navController, "complaint_detail/$complaintId")
                             }
                         )
                     }
@@ -458,10 +458,10 @@ class MainActivity : ComponentActivity() {
                     composable("admin_profile") {
                         AdminProfileScreen(
                             onBack = { navController.popBackStack() },
-                            onChangePassword = { navController.navigate("change_password") },
+                            onChangePassword = { SafeNavigator.navigate(navController, "change_password") },
                             onLogoutClick = {
                                 TokenManager.clear()
-                                navController.navigate("role_selection") {
+                                SafeNavigator.navigate(navController, "role_selection") {
                                     popUpTo(0) { inclusive = true }
                                 }
                             }
@@ -471,7 +471,7 @@ class MainActivity : ComponentActivity() {
                         ChangePasswordScreen(
                             onBack = { navController.popBackStack() },
                             onUpdatePassword = {
-                                navController.navigate("password_updated/Admin") {
+                                SafeNavigator.navigate(navController, "password_updated/Admin") {
                                     popUpTo("admin_profile") { inclusive = true }
                                 }
                             }
@@ -481,7 +481,7 @@ class MainActivity : ComponentActivity() {
                         LogoutScreen(
                             onConfirm = {
                                 TokenManager.clear()
-                                navController.navigate("role_selection") {
+                                SafeNavigator.navigate(navController, "role_selection") {
                                     popUpTo(0) { inclusive = true }
                                 }
                             },
@@ -493,7 +493,7 @@ class MainActivity : ComponentActivity() {
                         ResetPasswordScreen(
                             role = role,
                             onBack = { navController.popBackStack() },
-                            onSendOTP = { navController.navigate("verify_otp/$role") }
+                            onSendOTP = { SafeNavigator.navigate(navController, "verify_otp/$role") }
                         )
                     }
                     composable("verify_otp/{role}") { backStackEntry ->
@@ -501,7 +501,7 @@ class MainActivity : ComponentActivity() {
                         VerifyOTPScreen(
                             role = role,
                             onBack = { navController.popBackStack() },
-                            onContinue = { navController.navigate("create_new_password/$role") }
+                            onContinue = { SafeNavigator.navigate(navController, "create_new_password/$role") }
                         )
                     }
                     composable("create_new_password/{role}") { backStackEntry ->
@@ -509,7 +509,7 @@ class MainActivity : ComponentActivity() {
                         CreateNewPasswordScreen(
                             role = role,
                             onBack = { navController.popBackStack() },
-                            onUpdatePassword = { navController.navigate("password_updated/$role") }
+                            onUpdatePassword = { SafeNavigator.navigate(navController, "password_updated/$role") }
                         )
                     }
                     composable("password_updated/{role}") { backStackEntry ->
@@ -517,7 +517,7 @@ class MainActivity : ComponentActivity() {
                         PasswordUpdatedScreen(
                             role = role,
                             onBackToLogin = {
-                                navController.navigate("login/$role") {
+                                SafeNavigator.navigate(navController, "login/$role") {
                                     popUpTo("login/$role") { inclusive = true }
                                 }
                             }

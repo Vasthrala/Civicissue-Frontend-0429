@@ -134,7 +134,12 @@ fun CreateOfficerScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
                             value = fullName,
-                            onValueChange = { fullName = it },
+                            onValueChange = { newValue ->
+                                // Filter: Only allow alphabets and spaces
+                                if (newValue.all { it.isLetter() || it.isWhitespace() }) {
+                                    fullName = newValue
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             placeholder = { Text("John Doe", color = Color.Gray) },
                             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = Color.Gray) },
@@ -371,6 +376,11 @@ fun CreateOfficerScreen(
                         // Client-side validation
                         if (fullName.isBlank() || email.isBlank() || password.isBlank()) {
                             errorMessage = "Please fill in all required fields"
+                            return@Button
+                        }
+                        // Explicit name validation check
+                        if (!fullName.all { it.isLetter() || it.isWhitespace() }) {
+                            errorMessage = "Name must only contain alphabets and spaces"
                             return@Button
                         }
                         if (!email.trim().matches(Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"))) {

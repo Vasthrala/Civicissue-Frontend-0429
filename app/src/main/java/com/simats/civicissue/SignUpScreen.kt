@@ -122,7 +122,17 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                     Column(
                         modifier = Modifier.padding(24.dp)
                     ) {
-                        SignUpTextField(label = "Full Name", value = fullName, onValueChange = { fullName = it }, placeholder = "John Doe")
+                        SignUpTextField(
+                            label = "Full Name",
+                            value = fullName,
+                            onValueChange = { newValue ->
+                                // Filter: Only allow alphabets and spaces
+                                if (newValue.all { it.isLetter() || it.isWhitespace() }) {
+                                    fullName = newValue
+                                }
+                            },
+                            placeholder = "John Doe"
+                        )
                         Spacer(modifier = Modifier.height(20.dp))
                         SignUpTextField(label = "Email", value = email, onValueChange = { email = it.trim() }, placeholder = "example@gmail.com")
                         if (email.isNotBlank() && !email.matches(Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"))) {
@@ -133,42 +143,22 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                         Text(text = "Phone Number", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = Color.Black)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            ExposedDropdownMenuBox(
-                                expanded = countryCodeExpanded,
-                                onExpandedChange = { countryCodeExpanded = it },
-                                modifier = Modifier.weight(0.40f)
-                            ) {
-                                val selectedFlag = countryCodes.find { it.first == selectedCountryCode }?.second ?: ""
-                                OutlinedTextField(
-                                    value = "$selectedFlag $selectedCountryCode",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    modifier = Modifier.menuAnchor().fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = OutlinedTextFieldDefaults.colors(
-                                        focusedTextColor = Color.Black,
-                                        unfocusedTextColor = Color.Black,
-                                        unfocusedBorderColor = Color.LightGray,
-                                        focusedBorderColor = PrimaryBlue
-                                    ),
-                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = countryCodeExpanded) }
+                            // Static +91 for India as requested
+                            OutlinedTextField(
+                                value = "🇮🇳 +91",
+                                onValueChange = {},
+                                readOnly = true,
+                                modifier = Modifier.weight(0.35f),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = Color.Black,
+                                    unfocusedTextColor = Color.Black,
+                                    unfocusedBorderColor = Color.LightGray,
+                                    focusedBorderColor = Color.LightGray,
+                                    unfocusedContainerColor = Color(0xFFF8F9FF),
+                                    focusedContainerColor = Color(0xFFF8F9FF)
                                 )
-                                ExposedDropdownMenu(
-                                    expanded = countryCodeExpanded,
-                                    onDismissRequest = { countryCodeExpanded = false },
-                                    modifier = Modifier.background(Color.White)
-                                ) {
-                                    countryCodes.forEach { (code, flag, country) ->
-                                        DropdownMenuItem(
-                                            text = { Text("$flag $country ($code)", color = Color.Black) },
-                                            onClick = {
-                                                selectedCountryCode = code
-                                                countryCodeExpanded = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
+                            )
                             Spacer(modifier = Modifier.width(8.dp))
                             OutlinedTextField(
                                 value = phoneNumber,
@@ -176,10 +166,14 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                                     // Only allow digits, max 10
                                     val digitsOnly = newValue.filter { it.isDigit() }
                                     if (digitsOnly.length <= 10) {
-                                        phoneNumber = digitsOnly
+                                        // Requirement: Must start with 6, 7, 8, or 9 (Indian Mobile Format)
+                                        if (digitsOnly.isEmpty() || digitsOnly[0] in '6'..'9') {
+                                            phoneNumber = digitsOnly
+                                            errorMessage = null
+                                        }
                                     }
                                 },
-                                modifier = Modifier.weight(0.60f),
+                                modifier = Modifier.weight(0.65f),
                                 placeholder = { Text("9876543210", color = Color.Gray) },
                                 shape = RoundedCornerShape(12.dp),
                                 singleLine = true,
@@ -192,8 +186,12 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                                 )
                             )
                         }
-                        if (phoneNumber.isNotBlank() && phoneNumber.length != 10) {
-                            Text("Phone number must be exactly 10 digits", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
+                        if (phoneNumber.isNotBlank()) {
+                            if (phoneNumber.length != 10) {
+                                Text("Phone number must be exactly 10 digits", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
+                            } else if (phoneNumber[0] !in '6'..'9') {
+                                Text("Mobile number must start with 6, 7, 8, or 9", color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(start = 4.dp, top = 4.dp))
+                            }
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                         
@@ -316,13 +314,24 @@ fun SignUpScreen(onBack: () -> Unit, onVerifyAccount: () -> Unit, onLogin: () ->
                             errorMessage = "Please fill in all required fields"
                             return@Button
                         }
+                        // Explicit name validation check
+                        if (!fullName.all { it.isLetter() || it.isWhitespace() }) {
+                            errorMessage = "Name must only contain alphabets and spaces"
+                            return@Button
+                        }
                         if (!email.trim().matches(Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"))) {
                             errorMessage = "Please enter a valid email address"
                             return@Button
                         }
-                        if (phoneNumber.isNotBlank() && phoneNumber.length != 10) {
-                            errorMessage = "Phone number must be exactly 10 digits"
-                            return@Button
+                        if (phoneNumber.isNotBlank()) {
+                            if (phoneNumber.length != 10) {
+                                errorMessage = "Phone number must be exactly 10 digits"
+                                return@Button
+                            }
+                            if (phoneNumber[0] !in '6'..'9') {
+                                errorMessage = "Phone number must start with 6, 7, 8, or 9"
+                                return@Button
+                            }
                         }
                         if (password.length < 8) {
                             errorMessage = "Password must be at least 8 characters"

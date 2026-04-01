@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,22 +59,32 @@ fun CitizenNotificationScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
                         "Notifications",
                         fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.ExtraBold,
                         color = Color.Black
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.Black
-                        )
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color.White,
+                            shadowElevation = 2.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back",
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
                     }
                 },
                 actions = {
@@ -85,51 +96,64 @@ fun CitizenNotificationScreen(
                             } catch (_: Exception) {}
                         }
                     }) {
-                        Text("Mark All Read", color = PrimaryBlue, fontSize = 12.sp)
+                        Text("Mark all read", color = PrimaryBlue, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.White
                 )
             )
         },
-        containerColor = Color(0xFFF5F7FA)
+        containerColor = Color(0xFFF0F4F8)
     ) { paddingValues ->
-        if (isLoading) {
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PrimaryBlue)
-            }
-        } else if (errorMessage != null) {
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                Text(errorMessage!!, color = Color.Red)
-            }
-        } else if (notifications.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                Text("No notifications yet.", color = Color.DarkGray)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(vertical = 16.dp)
-            ) {
-                items(notifications) { notification ->
-                    val info = notification.toNotificationInfo()
-                    CitizenNotificationItem(notification = info, isRead = notification.isRead) {
-                        selectedNotification = notification
-                        showSheet = true
-                        // Mark as read
-                        if (!notification.isRead) {
-                            scope.launch {
-                                try {
-                                    RetrofitClient.instance.markNotificationRead(notification.id)
-                                    notifications = notifications.map {
-                                        if (it.id == notification.id) it.copy(isRead = true) else it
-                                    }
-                                } catch (_: Exception) {}
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = PrimaryBlue)
+                }
+            } else if (errorMessage != null) {
+                Box(modifier = Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Text(errorMessage!!, color = Color.Red, textAlign = TextAlign.Center)
+                }
+            } else if (notifications.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Surface(
+                        modifier = Modifier.size(80.dp),
+                        shape = CircleShape,
+                        color = Color.White,
+                        shadowElevation = 8.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.NotificationsNone, null, tint = Color.LightGray, modifier = Modifier.size(40.dp))
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("No notifications available", color = Color.Gray, fontWeight = FontWeight.Medium)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(16.dp)
+                ) {
+                    items(notifications) { notification ->
+                        val info = notification.toNotificationInfo()
+                        CitizenNotificationItem(notification = info, isRead = notification.isRead) {
+                            selectedNotification = notification
+                            showSheet = true
+                            if (!notification.isRead) {
+                                scope.launch {
+                                    try {
+                                        RetrofitClient.instance.markNotificationRead(notification.id)
+                                        notifications = notifications.map {
+                                            if (it.id == notification.id) it.copy(isRead = true) else it
+                                        }
+                                    } catch (_: Exception) {}
+                                }
                             }
                         }
                     }
@@ -160,37 +184,39 @@ fun CitizenNotificationItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isRead) Color.White else PrimaryBlue.copy(alpha = 0.03f)
+            containerColor = Color.White
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.Top
         ) {
-            // Left color indicator strip
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .height(72.dp)
-                    .background(notification.color, RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
-            )
-
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            // Unread Indicator
+            if (!isRead) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .padding(top = 8.dp, start = 0.dp)
+                        .size(8.dp)
                         .clip(CircleShape)
-                        .background(notification.color.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
+                        .background(PrimaryBlue)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            } else {
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+
+            // Left Icon
+            Surface(
+                modifier = Modifier.size(52.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = notification.color.copy(alpha = 0.1f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = notification.icon,
                         contentDescription = null,
@@ -198,36 +224,49 @@ fun CitizenNotificationItem(
                         modifier = Modifier.size(24.dp)
                     )
                 }
+            }
 
-                Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = notification.title,
-                            fontSize = 15.sp,
-                            fontWeight = if (isRead) FontWeight.Bold else FontWeight.SemiBold,
-                            color = Color.Black
-                        )
-                        Text(
-                            text = notification.time,
-                            fontSize = 11.sp,
-                            color = Color.Gray
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
+            // Text Content
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
                     Text(
-                        text = notification.message,
-                        fontSize = 13.sp,
-                        color = if (isRead) Color.Gray else Color.DarkGray,
-                        lineHeight = 18.sp,
-                        maxLines = 2
+                        text = notification.title,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 2,
+                        minLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    Spacer(modifier = Modifier.width(12.dp))
+                    
+                    Text(
+                        text = if (notification.time.isEmpty()) "Just now" else notification.time,
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.wrapContentWidth()
                     )
                 }
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Text(
+                    text = notification.message,
+                    fontSize = 14.sp,
+                    color = Color(0xFF4B5563),
+                    lineHeight = 20.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
@@ -242,19 +281,19 @@ fun NotificationDetailContent(notification: CitizenNotificationInfo) {
             .padding(bottom = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(notification.color.copy(alpha = 0.1f)),
-            contentAlignment = Alignment.Center
+        Surface(
+            modifier = Modifier.size(64.dp),
+            shape = CircleShape,
+            color = notification.color.copy(alpha = 0.12f)
         ) {
-            Icon(
-                imageVector = notification.icon,
-                contentDescription = null,
-                tint = notification.color,
-                modifier = Modifier.size(32.dp)
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = notification.icon,
+                    contentDescription = null,
+                    tint = notification.color,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -263,12 +302,13 @@ fun NotificationDetailContent(notification: CitizenNotificationInfo) {
             text = notification.title,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = Color.Black,
+            textAlign = TextAlign.Center
         )
 
         Text(
             text = notification.time,
-            fontSize = 12.sp,
+            fontSize = 13.sp,
             color = Color.Gray
         )
 
@@ -276,63 +316,57 @@ fun NotificationDetailContent(notification: CitizenNotificationInfo) {
 
         Text(
             text = notification.message,
-            fontSize = 15.sp,
-            color = Color.DarkGray,
+            fontSize = 16.sp,
+            color = Color(0xFF374151),
             textAlign = TextAlign.Center,
-            lineHeight = 22.sp
+            lineHeight = 24.sp
         )
 
-        if (notification.image != null) {
+        if (notification.image != null || !notification.imageUrl.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                "Attached Proof:",
+                "Attachment Proof:",
                 modifier = Modifier.fillMaxWidth(),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Image(
-                bitmap = notification.image.asImageBitmap(),
-                contentDescription = "Resolution Proof",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
-            )
-        } else if (!notification.imageUrl.isNullOrEmpty()) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                "Resolution Proof:",
-                modifier = Modifier.fillMaxWidth(),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            val baseUrl = RetrofitClient.BASE_URL.trimEnd('/')
-            val fullUrl = if (notification.imageUrl.startsWith("http")) notification.imageUrl else "$baseUrl${notification.imageUrl}"
-            AsyncImage(
-                model = fullUrl,
-                contentDescription = "Resolution Proof",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
-            )
+            Spacer(modifier = Modifier.height(10.dp))
+            
+            if (notification.image != null) {
+                Image(
+                    bitmap = notification.image.asImageBitmap(),
+                    contentDescription = "Attachment",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                val baseUrl = RetrofitClient.BASE_URL.trimEnd('/')
+                val fullUrl = if (notification.imageUrl!!.startsWith("http")) notification.imageUrl else "$baseUrl${notification.imageUrl}"
+                AsyncImage(
+                    model = fullUrl,
+                    contentDescription = "Attachment",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = { /* Could mark as read or navigate */ },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
+            onClick = { /* Detail Action */ },
+            modifier = Modifier.fillMaxWidth().height(52.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
         ) {
-            Text("Acknowledge", fontWeight = FontWeight.Bold)
+            Text("Acknowledge", fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
     }
 }
@@ -348,28 +382,26 @@ data class CitizenNotificationInfo(
 )
 
 fun CivicNotification.toNotificationInfo(): CitizenNotificationInfo {
-    val iconAndColor = when (type.lowercase()) {
-        "status_update" -> Icons.Default.Refresh to PrimaryBlue
-        "complaint_created" -> Icons.Default.CheckCircle to Color(0xFF4CAF50)
-        "complaint_resolved", "resolved", "resolution" -> Icons.Default.TaskAlt to Color(0xFF4CAF50)
-        "assignment" -> Icons.Default.PersonAdd to PrimaryBlue
-        "comment" -> Icons.Default.Comment to Color(0xFFFFA000)
-        "alert", "warning" -> Icons.Default.Warning to Color(0xFFD32F2F)
-        else -> Icons.Default.Notifications to PrimaryBlue
+    val lowerTitle = title.lowercase()
+    val lowerType = type.lowercase()
+    
+    val (icon, color) = when {
+        lowerType == "status_update" -> Icons.Default.RotateRight to PrimaryBlue
+        lowerType.contains("assigned") || lowerTitle.contains("assigned") -> Icons.Default.PersonSearch to Color(0xFF6366F1)
+        lowerType.contains("resolved") || lowerTitle.contains("resolved") || lowerTitle.contains("completed") -> Icons.Default.CheckCircle to Color(0xFF4CAF50)
+        lowerType == "complaint_created" || lowerTitle.contains("new") -> Icons.Default.PostAdd to Color(0xFF0EA5E9)
+        lowerType == "alert" || lowerTitle.contains("urgent") -> Icons.Default.Error to Color(0xFFD32F2F)
+        else -> Icons.Default.Notifications to Color(0xFFF59E0B)
     }
+    
     return CitizenNotificationInfo(
         title = title,
         message = message,
-        time = createdAt?.let { formatDate(it) } ?: "",
-        icon = iconAndColor.first,
-        color = iconAndColor.second,
+        time = createdAt?.let { formatCivicNotificationDate(it) } ?: "Just now",
+        icon = icon,
+        color = color,
         imageUrl = imageUrl
     )
-}
-
-// Keep for backward compat but no longer used for data
-object CitizenNotificationStore {
-    val citizenNotifications = mutableStateListOf<CitizenNotificationInfo>()
 }
 
 @Preview(showBackground = true)
