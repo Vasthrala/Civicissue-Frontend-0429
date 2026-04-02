@@ -76,12 +76,16 @@ fun OfficerDashboardScreen(
         try {
             val unread = api.getUnreadCount()
             unreadNotifications = unread.count
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            safeLog("OfficerDashboard", "Failed to load unread count", e)
+        }
         try {
             val profile = api.getProfile()
             userName = profile.full_name
             TokenManager.saveUser(profile)
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            safeLog("OfficerDashboard", "Failed to load profile", e)
+        }
         isLoading = false
     }
 
@@ -400,7 +404,7 @@ fun OfficerTaskCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .debouncedClickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)

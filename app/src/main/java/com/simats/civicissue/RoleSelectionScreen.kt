@@ -118,14 +118,14 @@ fun RoleCard(
     onClick: () -> Unit
 ) {
     Card(
-        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .shadow(
                 elevation = 6.dp,
                 shape = RoundedCornerShape(16.dp),
                 spotColor = ShadowBlue
-            ),
+            )
+            .debouncedClickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White

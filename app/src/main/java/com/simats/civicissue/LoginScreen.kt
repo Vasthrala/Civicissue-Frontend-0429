@@ -134,7 +134,7 @@ fun LoginScreen(
                     modifier = Modifier.padding(24.dp)
                 ) {
                     Text(
-                        text = "Email / Mobile Number",
+                        text = "Email",
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp,
                         color = Color.Black
@@ -274,42 +274,46 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Divider
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    thickness = 0.5.dp,
-                    color = Color.LightGray.copy(alpha = 0.5f)
-                )
-                Text(
-                    text = "  Or  ",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    thickness = 0.5.dp,
-                    color = Color.LightGray.copy(alpha = 0.5f)
-                )
+            if (role != "Admin") {
+                // Divider
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f),
+                        thickness = 0.5.dp,
+                        color = Color.LightGray.copy(alpha = 0.5f)
+                    )
+                    Text(
+                        text = "  Or  ",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.weight(1f),
+                        thickness = 0.5.dp,
+                        color = Color.LightGray.copy(alpha = 0.5f)
+                    )
+                }
             }
 
-            // Footer
-            Text(
-                text = buildAnnotatedString {
-                    append("Don't have an account? ")
-                    withStyle(style = SpanStyle(color = PrimaryBlue, fontWeight = FontWeight.Bold)) {
-                        append("Sign Up")
-                    }
-                },
-                fontSize = 16.sp,
-                color = Color.Gray,
-                modifier = Modifier.clickable { onSignUp() }
-            )
+            if (role != "Admin") {
+                // Footer
+                Text(
+                    text = buildAnnotatedString {
+                        append("Don't have an account? ")
+                        withStyle(style = SpanStyle(color = PrimaryBlue, fontWeight = FontWeight.Bold)) {
+                            append("Sign Up")
+                        }
+                    },
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.clickable { onSignUp() }
+                )
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
         }

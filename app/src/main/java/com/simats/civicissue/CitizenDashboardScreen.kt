@@ -101,12 +101,16 @@ fun CitizenDashboardScreen(
         try {
             val unread = api.getUnreadCount()
             unreadNotifications = unread.count
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            safeLog("CitizenDashboard", "Failed to load unread count", e)
+        }
         try {
             val profile = api.getProfile()
             userName = profile.full_name
             TokenManager.saveUser(profile)
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            safeLog("CitizenDashboard", "Failed to load profile", e)
+        }
         isLoading = false
     }
 
@@ -261,7 +265,7 @@ fun CitizenDashboardScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onReportIssue() },
+                        .debouncedClickable { onReportIssue() },
                     shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                     elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
@@ -310,14 +314,14 @@ fun CitizenDashboardScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     CitizenStatCard(
-                        modifier = Modifier.weight(1f).clickable { onActiveIssuesClick() },
+                        modifier = Modifier.weight(1f).debouncedClickable { onActiveIssuesClick() },
                         label = "Active Issues",
                         value = activeIssuesCount,
                         icon = Icons.Default.ErrorOutline,
                         color = StatusWarning
                     )
                     CitizenStatCard(
-                        modifier = Modifier.weight(1f).clickable { onResolvedIssuesClick() },
+                        modifier = Modifier.weight(1f).debouncedClickable { onResolvedIssuesClick() },
                         label = "Resolved",
                         value = resolvedIssuesCount,
                         icon = Icons.Default.Verified,
@@ -344,7 +348,7 @@ fun CitizenDashboardScreen(
                         fontSize = 14.sp,
                         color = PrimaryBlue,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.clickable { onViewMyIssues() }
+                        modifier = Modifier.debouncedClickable { onViewMyIssues() }
                     )
                 }
             }
@@ -373,7 +377,7 @@ fun CitizenDashboardScreen(
                     )
                     CitizenReportItem(
                         report = report,
-                        modifier = Modifier.clickable { onComplaintClick(complaint.id) }
+                        modifier = Modifier.debouncedClickable { onComplaintClick(complaint.id) }
                     )
                 }
             }
@@ -542,13 +546,26 @@ fun categoryIcon(category: String?): ImageVector = when (category?.lowercase()) 
 }
 
 fun formatDate(iso: String): String {
+    if (iso.isBlank()) return ""
     return try {
+        // Attempt to handle common ISO variations
+        val cleanIso = iso.replace("Z", "").let { 
+            if (it.contains(".")) it.substringBefore(".") else it 
+        }
         val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         parser.timeZone = TimeZone.getTimeZone("UTC")
-        val date = parser.parse(iso)
+        val date = parser.parse(cleanIso)
         val formatter = SimpleDateFormat("MMM dd, hh:mm a", Locale.getDefault())
         formatter.format(date!!)
-    } catch (_: Exception) { iso }
+    } catch (_: Exception) { 
+        // Fallback for more simple dates or failures
+        try {
+             val parser = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+             val date = parser.parse(iso)
+             val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+             formatter.format(date!!)
+        } catch (_: Exception) { iso }
+    }
 }
 
 @Preview(showBackground = true)
