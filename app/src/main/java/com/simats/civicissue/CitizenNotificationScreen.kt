@@ -159,35 +159,37 @@ fun CitizenNotificationItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
+            .clickable { onClick() }
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isRead) Color.White else PrimaryBlue.copy(alpha = 0.03f)
+            containerColor = Color.White
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left color indicator strip
+            // Left blue indicator strip
             Box(
                 modifier = Modifier
-                    .width(3.dp)
-                    .height(72.dp)
-                    .background(notification.color, RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(PrimaryBlue, RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
             )
 
             Row(
                 modifier = Modifier
-                    .weight(1f)
+                    .fillMaxWidth()
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Icon Container with soft background
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(notification.color.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -205,27 +207,29 @@ fun CitizenNotificationItem(
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.Top
                     ) {
                         Text(
                             text = notification.title,
-                            fontSize = 15.sp,
-                            fontWeight = if (isRead) FontWeight.Bold else FontWeight.SemiBold,
-                            color = Color.Black
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.weight(1f).padding(end = 8.dp)
                         )
                         Text(
                             text = notification.time,
-                            fontSize = 11.sp,
-                            color = Color.Gray
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                            textAlign = TextAlign.End
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = notification.message,
-                        fontSize = 13.sp,
-                        color = if (isRead) Color.Gray else Color.DarkGray,
-                        lineHeight = 18.sp,
-                        maxLines = 2
+                        fontSize = 14.sp,
+                        color = Color.DarkGray,
+                        lineHeight = 20.sp,
+                        maxLines = 3
                     )
                 }
             }
@@ -347,12 +351,13 @@ data class CitizenNotificationInfo(
     val imageUrl: String? = null
 )
 
+
 fun CivicNotification.toNotificationInfo(): CitizenNotificationInfo {
     val iconAndColor = when (type.lowercase()) {
-        "status_update" -> Icons.Default.Refresh to PrimaryBlue
-        "complaint_created" -> Icons.Default.CheckCircle to Color(0xFF4CAF50)
+        "status_update" -> Icons.Default.Sync to Color(0xFF4CAF50) // Green for status updates like web
+        "complaint_created", "new_issue" -> Icons.Default.AddCircle to PrimaryBlue
         "complaint_resolved", "resolved", "resolution" -> Icons.Default.TaskAlt to Color(0xFF4CAF50)
-        "assignment" -> Icons.Default.PersonAdd to PrimaryBlue
+        "assignment", "officer_assigned" -> Icons.Default.Person to PrimaryBlue
         "comment" -> Icons.Default.Comment to Color(0xFFFFA000)
         "alert", "warning" -> Icons.Default.Warning to Color(0xFFD32F2F)
         else -> Icons.Default.Notifications to PrimaryBlue
@@ -360,16 +365,11 @@ fun CivicNotification.toNotificationInfo(): CitizenNotificationInfo {
     return CitizenNotificationInfo(
         title = title,
         message = message,
-        time = createdAt?.let { formatDate(it) } ?: "",
+        time = createdAt?.let { formatDateProperly(it) } ?: "Just now",
         icon = iconAndColor.first,
         color = iconAndColor.second,
         imageUrl = imageUrl
     )
-}
-
-// Keep for backward compat but no longer used for data
-object CitizenNotificationStore {
-    val citizenNotifications = mutableStateListOf<CitizenNotificationInfo>()
 }
 
 @Preview(showBackground = true)

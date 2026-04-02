@@ -47,6 +47,7 @@ fun LoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Scaffold(
         topBar = {
@@ -226,6 +227,11 @@ fun LoginScreen(
                                     )
                                     TokenManager.saveToken(response.access_token)
                                     TokenManager.saveUser(response.user)
+                                    
+                                    // Reset subscription view flag so it shows up after this fresh login
+                                    val prefs = context.getSharedPreferences("CivicIssuePrefs", android.content.Context.MODE_PRIVATE)
+                                    prefs.edit().remove("has_seen_subscription").apply()
+                                    
                                     onLoginSuccess(response.user.role)
                                 } catch (e: retrofit2.HttpException) {
                                     errorMessage = when (e.code()) {

@@ -28,6 +28,8 @@ import com.simats.civicissue.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
+import android.content.Context
+import android.content.Intent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +44,7 @@ fun CitizenDashboardScreen(
     onAIChatClick: () -> Unit = {},
     onComplaintClick: (String) -> Unit = {}
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     var recentComplaints by remember { mutableStateOf<List<Complaint>>(emptyList()) }
     var activeIssuesCount by remember { mutableStateOf("--") }
     var resolvedIssuesCount by remember { mutableStateOf("--") }
@@ -56,6 +59,26 @@ fun CitizenDashboardScreen(
     }
 
     LaunchedEffect(Unit) {
+        val prefs = context.getSharedPreferences("CivicIssuePrefs", Context.MODE_PRIVATE)
+        val isPremium = prefs.getBoolean("is_premium_user", false)
+        val hasSeenSubscription = prefs.getBoolean("has_seen_subscription", false)
+        
+        android.util.Log.d("CitizenDashboard", "Subscription check: isPremium=$isPremium, hasSeen=$hasSeenSubscription")
+        
+        if (!isPremium && !hasSeenSubscription) {
+            kotlinx.coroutines.delay(1000)
+            try {
+                android.util.Log.d("CitizenDashboard", "Attempting to start SubscriptionActivity")
+                val intent = Intent(context, SubscriptionActivity::class.java)
+                context.startActivity(intent)
+                // Set the flag AFTER successful start to ensure it tries again if failed
+                prefs.edit().putBoolean("has_seen_subscription", true).apply()
+            } catch (e: Exception) {
+                android.util.Log.e("CitizenDashboard", "Could not start SubscriptionActivity", e)
+                android.widget.Toast.makeText(context, "Error opening subscription: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+            }
+        }
+        
         val api = RetrofitClient.instance
         try {
             // Fetch recent complaints

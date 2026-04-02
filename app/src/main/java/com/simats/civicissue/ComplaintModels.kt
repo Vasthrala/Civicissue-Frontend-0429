@@ -2,6 +2,8 @@ package com.simats.civicissue
 
 import androidx.compose.ui.graphics.Color
 import com.google.gson.annotations.SerializedName
+import java.util.*
+import java.text.SimpleDateFormat
 
 // ===== Complaint Models =====
 data class Complaint(
@@ -319,5 +321,37 @@ data class CitizenReportDto(
     val icon: String = ""
 )
 
-// ===== Remove allComplaints mock data =====
-// Mock data has been removed - all data comes from backend API
+fun formatDateProperly(iso: String?): String {
+    if (iso.isNullOrEmpty() || iso == "undefined") return "Just now"
+    return try {
+        val cleanedIso = iso.split(".")[0].replace("Z", "")
+        val parser = SimpleDateFormat(
+            if (cleanedIso.contains("T")) "yyyy-MM-dd'T'HH:mm:ss" else "yyyy-MM-dd HH:mm:ss",
+            Locale.getDefault()
+        )
+        parser.timeZone = TimeZone.getTimeZone("UTC")
+        val date = parser.parse(cleanedIso) ?: return iso
+        
+        val now = Calendar.getInstance()
+        val then = Calendar.getInstance()
+        then.time = date
+        
+        val diffMs = now.timeInMillis - then.timeInMillis
+        val diffMins = diffMs / 60000
+        val diffHours = diffMins / 60
+        val diffDays = diffHours / 24
+        
+        when {
+            diffMins < 1 -> "Just now"
+            diffMins < 60 -> "${diffMins}m ago"
+            diffHours < 24 -> "${diffHours}h ago"
+            diffDays < 7 -> "${diffDays}d ago"
+            else -> {
+                val formatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                formatter.format(date)
+            }
+        }
+    } catch (_: Exception) { 
+        iso
+    }
+}

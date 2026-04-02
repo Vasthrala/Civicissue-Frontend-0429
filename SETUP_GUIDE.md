@@ -122,7 +122,7 @@ cd backend
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-**Verify:** Open http://localhost:8000/docs in a browser — you should see the Swagger UI.
+**Verify:** Open http://180.235.121.245:8021/docs in a browser — you should see the Swagger UI.
 
 **Default Admin Credentials:**
 ```
@@ -155,11 +155,11 @@ Edit: `app/src/main/java/com/simats/civicissue/RetrofitClient.kt`
 
 ```kotlin
 // Line ~11 — change to your laptop's IP
-const val BASE_URL = "http://YOUR_LAPTOP_IP:8000/"
+const val BASE_URL = "http://180.235.121.245:8021/"
 ```
 
 **Examples:**
-- Physical device on same WiFi: `http://192.168.1.100:8000/`
+- College Server (Deployed): `http://180.235.121.245:8021/`
 - Android Emulator: `http://10.0.2.2:8000/`
 
 ### 3.3 Google Maps API Key
@@ -211,8 +211,8 @@ Or run directly from Android Studio.
 
 | Test | Command | Expected |
 |------|---------|----------|
-| Health check | `curl http://localhost:8000/health` | `{"status":"ok"}` |
-| Swagger docs | Open `http://localhost:8000/docs` | Interactive API docs |
+| Health check | `curl http://180.235.121.245:8021/health` | `{"status":"ok"}` |
+| Swagger docs | Open `http://180.235.121.245:8021/docs` | Interactive API docs |
 | Admin login | POST `/api/auth/login` with admin creds | Returns JWT token |
 | Categories | GET `/api/admin/categories` with token | Returns 8 categories |
 

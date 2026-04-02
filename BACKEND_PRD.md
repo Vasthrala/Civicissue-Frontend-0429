@@ -36,7 +36,7 @@ The backend powers all features including authentication, complaint management, 
 The Android app (Jetpack Compose + Kotlin) already has:
 
 - **40 screens** across Citizen and Admin portals
-- **Retrofit HTTP client** at `http://10.0.2.2:8000/`
+- **Retrofit HTTP client** at `http://180.235.121.245:8021/`
 - Camera/gallery image capture (returns `Bitmap` / `Uri`)
 - Navigation graph with role-based routing
 - Complaint data models, status enums, priority enums

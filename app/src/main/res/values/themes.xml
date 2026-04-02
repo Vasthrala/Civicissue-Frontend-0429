@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="Theme.CivicIssue" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#F5F7FA</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
 
-    <style name="Theme.CivicIssue" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.CivicIssue.Subscription" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#0A0E27</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
 </resources>

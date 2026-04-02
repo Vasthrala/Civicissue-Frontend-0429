@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -118,10 +119,10 @@ fun NotificationScreen(
                         "MEDIUM" -> Color(0xFFFFA000)
                         else -> PrimaryBlue
                     }
-                    val icon = when (notification.type) {
-                        "complaint_created" -> Icons.Default.AddCircle
-                        "status_update" -> Icons.Default.CheckCircle
-                        "officer_assigned" -> Icons.Default.Engineering
+                    val icon = when (notification.type.lowercase()) {
+                        "complaint_created", "new_issue" -> Icons.Default.AddCircle
+                        "status_update" -> Icons.Default.Sync
+                        "officer_assigned", "assignment" -> Icons.Default.Person
                         "high_priority" -> Icons.Default.Warning
                         else -> Icons.Default.Notifications
                     }
@@ -131,7 +132,7 @@ fun NotificationScreen(
                             description = notification.message,
                             time = notification.createdAt ?: "",
                             icon = icon,
-                            iconBgColor = iconColor
+                            iconBgColor = if (notification.type == "status_update") Color(0xFF4CAF50) else iconColor
                         ),
                         isRead = notification.isRead,
                         onClick = {
@@ -158,33 +159,39 @@ fun AdminNotificationItem(
     onClick: () -> Unit = {}
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = if (isRead) Color.White else Color(0xFFE3F2FD)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-            // Left accent border for unread items
-            if (!isRead) {
-                Box(
-                    modifier = Modifier
-                        .width(3.dp)
-                        .fillMaxHeight()
-                        .background(PrimaryBlue, RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp))
-                )
-            }
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left blue indicator strip
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(PrimaryBlue, RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
+            )
+
             Row(
                 modifier = Modifier
-                    .padding(16.dp)
                     .fillMaxWidth()
-                    .weight(1f),
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Icon Container
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(notification.iconBgColor.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -198,37 +205,40 @@ fun AdminNotificationItem(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                // Text Content
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.Top
                     ) {
                         Text(
                             text = notification.title,
                             fontSize = 16.sp,
-                            fontWeight = if (isRead) FontWeight.Medium else FontWeight.Bold,
-                            color = if (isRead) TextSecondary else Color.Black
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.weight(1f).padding(end = 8.dp)
                         )
                         Text(
-                            text = notification.time,
+                            text = formatDateProperly(notification.time),
                             fontSize = 12.sp,
-                            color = if (isRead) TextSecondary else Color.Gray
+                            color = Color.Gray,
+                            textAlign = TextAlign.End
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = notification.description,
                         fontSize = 14.sp,
-                        color = if (isRead) TextSecondary else Color.Gray,
-                        lineHeight = 20.sp
+                        color = Color.DarkGray,
+                        lineHeight = 20.sp,
+                        maxLines = 3
                     )
                 }
             }
         }
     }
 }
+
 
 data class AdminNotificationInfo(
     val title: String,

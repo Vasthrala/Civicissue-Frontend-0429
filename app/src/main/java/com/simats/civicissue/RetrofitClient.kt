@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     // Use 10.0.2.2 for Android Emulator, or your laptop IP for physical device
-    const val BASE_URL = "http://10.161.158.6:8000/"
+    const val BASE_URL = "http://180.235.121.245:8021/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -23,9 +23,9 @@ object RetrofitClient {
             chain.proceed(requestBuilder.build())
         }
         .addInterceptor(loggingInterceptor)
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
         .build()
 
     val instance: CivicApiService by lazy {

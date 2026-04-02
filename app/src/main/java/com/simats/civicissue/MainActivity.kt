@@ -207,6 +207,8 @@ class MainActivity : ComponentActivity() {
                             onEditProfile = { navController.navigate("edit_profile") },
                             onChangePassword = { navController.navigate("citizen_change_password") },
                             onLogoutClick = {
+                                val prefs = getSharedPreferences("CivicIssuePrefs", android.content.Context.MODE_PRIVATE)
+                                prefs.edit().putBoolean("has_seen_subscription", false).apply()
                                 TokenManager.clear()
                                 navController.navigate("role_selection") {
                                     popUpTo(0) { inclusive = true }
@@ -330,6 +332,8 @@ class MainActivity : ComponentActivity() {
                             onEditProfile = { navController.navigate("edit_profile") },
                             onChangePassword = { navController.navigate("officer_change_password") },
                             onLogoutClick = {
+                                val prefs = getSharedPreferences("CivicIssuePrefs", android.content.Context.MODE_PRIVATE)
+                                prefs.edit().putBoolean("has_seen_subscription", false).apply()
                                 TokenManager.clear()
                                 navController.navigate("role_selection") {
                                     popUpTo(0) { inclusive = true }
@@ -460,6 +464,8 @@ class MainActivity : ComponentActivity() {
                             onBack = { navController.popBackStack() },
                             onChangePassword = { navController.navigate("change_password") },
                             onLogoutClick = {
+                                val prefs = getSharedPreferences("CivicIssuePrefs", android.content.Context.MODE_PRIVATE)
+                                prefs.edit().putBoolean("has_seen_subscription", false).apply()
                                 TokenManager.clear()
                                 navController.navigate("role_selection") {
                                     popUpTo(0) { inclusive = true }
@@ -480,6 +486,8 @@ class MainActivity : ComponentActivity() {
                     composable("logout") {
                         LogoutScreen(
                             onConfirm = {
+                                val prefs = getSharedPreferences("CivicIssuePrefs", android.content.Context.MODE_PRIVATE)
+                                prefs.edit().putBoolean("has_seen_subscription", false).apply()
                                 TokenManager.clear()
                                 navController.navigate("role_selection") {
                                     popUpTo(0) { inclusive = true }
